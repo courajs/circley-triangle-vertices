@@ -1,3 +1,4 @@
+go();
 async function go() {
   let c = document.querySelector('#c');
   let gl = c.getContext('webgl2');
@@ -26,6 +27,8 @@ async function go() {
   gl.vertexAttribPointer(
     positionAttributeLocation, size, type, normalize, stride, offset);
 
+
+  resizeCanvasToDisplaySize(gl);
   // gl.viewport(0, 0, gl.canvas.width*window.devicePixelRatio, gl.canvas.height*window.devicePixelRatio);
 
   gl.clearColor(0,0,0,0);
@@ -40,7 +43,28 @@ async function go() {
   gl.drawArrays(primitiveType, offset, count);
 }
 
-go();
+
+function resizeCanvasToDisplaySize(gl) {
+  let canvas = gl.canvas;
+  // Lookup the size the browser is displaying the canvas in CSS pixels.
+  const dpr = window.devicePixelRatio;
+  const {width, height} = canvas.getBoundingClientRect();
+  const displayWidth  = Math.round(width * dpr);
+  const displayHeight = Math.round(height * dpr);
+ 
+  // Check if the canvas is not the same size.
+  const needResize = canvas.width  != displayWidth || 
+                     canvas.height != displayHeight;
+ 
+  if (needResize) {
+    // Make the canvas the same size
+    canvas.width  = displayWidth;
+    canvas.height = displayHeight;
+    gl.viewport(0,0,canvas.width, canvas.height);
+  }
+ 
+  return needResize;
+}
 
 async function vertex_shader(gl, name) {
   let source = await getshadertext(name+'.vertex');
